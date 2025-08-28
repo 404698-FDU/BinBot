@@ -7,7 +7,6 @@
     }
   ],
   "rewrites": [
-    // 将所有未匹配到的路径都指向 server.js
     {
       "source": "/(.*)",
       "destination": "/server.js"
