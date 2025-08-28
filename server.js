@@ -65,7 +65,7 @@ function retrieveRelevantLogs(query, topK = 10) {
 }
 
 // --- API 端点 ---
-app.post('/chat', async (req, res) => {
+app.post('/api/chat', async (req, res) => {
     console.log('\n--- [NEW REQUEST] ---');
     console.log('[DEBUG] 收到前端发来的请求...');
     try {
