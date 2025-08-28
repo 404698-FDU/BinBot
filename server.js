@@ -3,7 +3,6 @@ const cors = require('cors');
 const fs = require('fs');
 const path = require('path');
 const { GoogleGenerativeAI } = require("@google/generative-ai");
-require('dotenv').config(); // <-- 新增：加载 .env 文件
 
 // --- 配置 ---
 const PORT = 3000;
@@ -66,13 +65,6 @@ function retrieveRelevantLogs(query, topK = 10) {
 }
 
 // --- API 端点 ---
-// --- API 端点 ---
-
-// 新增：处理根路径的 GET 请求
-app.get('/', (req, res) => {
-  res.setHeader('Content-Type', 'text/html; charset=utf-8');
-  res.status(200).send('<h1>BinBot API 服务正在运行</h1><p>请通过 POST 请求访问 /api/chat 端点来使用聊天功能。</p>');
-});
 app.post('/chat', async (req, res) => {
     console.log('\n--- [NEW REQUEST] ---');
     console.log('[DEBUG] 收到前端发来的请求...');
