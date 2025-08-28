@@ -34,8 +34,9 @@ try {
     process.exit(1); // 如果知识库加载失败，则退出程序
 }
 
-// 2. 检索函数 (增加深度调试日志)
-function retrieveRelevantLogs(query, topK = 10) {
+// 2. 检索函数 (增加深度调试日志) 设为20条
+
+function retrieveRelevantLogs(query, topK = 20) {
     const queryChars = query.toLowerCase().replace(/[.,/#!$%^&*;:{}=\-_`~()?\s]/g,"").split('');
     
     // --- 新增深度调试日志 ---
@@ -64,8 +65,8 @@ function retrieveRelevantLogs(query, topK = 10) {
     return sortedLogs.slice(0, topK).map(item => item.log);
 }
 
-// --- API 端点 ---
-app.post('/api/chat', async (req, res) => {
+// --- API 端点 --- //注意不要打错成/chat了
+app.post('/api/chat', async (req, res) => { 
     console.log('\n--- [NEW REQUEST] ---');
     console.log('[DEBUG] 收到前端发来的请求...');
     try {
