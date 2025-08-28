@@ -1,0 +1,228 @@
+<!-- 
+  文件 1: index.html 
+  这是你的前端文件。直接用浏览器打开它。
+-->
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BinBot</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        #chat-container::-webkit-scrollbar {
+            width: 6px;
+        }
+        #chat-container::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+        #chat-container::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 3px;
+        }
+        #chat-container::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
+        .dot-flashing {
+            position: relative;
+            width: 6px;
+            height: 6px;
+            border-radius: 5px;
+            background-color: #9880ff;
+            color: #9880ff;
+            animation: dot-flashing 1s infinite linear alternate;
+            animation-delay: .5s;
+            margin: 10px 0;
+        }
+        .dot-flashing::before, .dot-flashing::after {
+            content: '';
+            display: inline-block;
+            position: absolute;
+            top: 0;
+        }
+        .dot-flashing::before {
+            left: -10px;
+            width: 6px;
+            height: 6px;
+            border-radius: 5px;
+            background-color: #9880ff;
+            color: #9880ff;
+            animation: dot-flashing 1s infinite alternate;
+            animation-delay: 0s;
+        }
+        .dot-flashing::after {
+            left: 10px;
+            width: 6px;
+            height: 6px;
+            border-radius: 5px;
+            background-color: #9880ff;
+            color: #9880ff;
+            animation: dot-flashing 1s infinite alternate;
+            animation-delay: 1s;
+        }
+        @keyframes dot-flashing {
+            0% { background-color: #A9A9A9; }
+            50%, 100% { background-color: #D3D3D3; }
+        }
+    </style>
+</head>
+<body class="bg-gray-100 flex items-center justify-center h-screen">
+    <div class="bg-white rounded-2xl shadow-2xl flex flex-col w-full max-w-2xl h-[90vh] mx-4">
+        <!-- 头部 -->
+        <div class="p-4 border-b border-gray-200 flex items-center bg-gray-50 rounded-t-2xl">
+            <div class="w-12 h-12 bg-purple-500 rounded-full flex items-center justify-center text-white text-xl font-bold mr-4">
+                AI
+            </div>
+            <div>
+                <h1 class="text-lg font-semibold text-gray-800">BinBot</h1>
+                <p class="text-sm text-green-500">● 在线</p>
+            </div>
+        </div>
+
+        <!-- 聊天窗口 -->
+        <div id="chat-container" class="flex-1 p-6 overflow-y-auto space-y-4">
+            <!-- 消息会在这里动态添加 -->
+        </div>
+
+        <!-- 输入区域 -->
+        <div class="p-4 border-t border-gray-200 bg-white rounded-b-2xl">
+            <div class="flex items-center bg-gray-100 rounded-xl p-2">
+                <input type="text" id="message-input" placeholder="输入你的消息..." class="flex-1 bg-transparent border-none focus:ring-0 text-gray-700 px-2">
+                <button id="send-button" class="ml-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg px-4 py-2 transition-colors duration-300">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-send"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const chatContainer = document.getElementById('chat-container');
+        const messageInput = document.getElementById('message-input');
+        const sendButton = document.getElementById('send-button');
+
+        // 对话历史，用于发送给后端
+        let conversationHistory = [];
+
+        // 添加消息到聊天窗口
+        function addMessage(sender, text) {
+            const messageElement = document.createElement('div');
+            messageElement.className = `flex items-start gap-3 max-w-md ${sender === 'user' ? 'self-end flex-row-reverse' : 'self-start'}`;
+            
+            const avatar = document.createElement('div');
+            avatar.className = `w-8 h-8 rounded-full flex items-center justify-center text-white font-bold text-sm ${sender === 'user' ? 'bg-blue-500' : 'bg-purple-500'}`;
+            avatar.textContent = sender === 'user' ? '你' : 'AI';
+
+            const messageBubble = document.createElement('div');
+            messageBubble.className = `p-3 rounded-lg ${sender === 'user' ? 'bg-blue-500 text-white rounded-br-none' : 'bg-gray-200 text-gray-800 rounded-bl-none'}`;
+            messageBubble.innerHTML = text; // 使用 innerHTML 以便渲染 Markdown
+
+            messageElement.appendChild(avatar);
+            messageElement.appendChild(messageBubble);
+            chatContainer.appendChild(messageElement);
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+            return messageBubble;
+        }
+        
+        // 添加加载动画
+        function addLoadingIndicator() {
+            const loadingElement = document.createElement('div');
+            loadingElement.id = 'loading-indicator';
+            loadingElement.className = 'flex items-start gap-3 max-w-md self-start';
+            loadingElement.innerHTML = `
+                <div class="w-8 h-8 rounded-full flex items-center justify-center text-white font-bold text-sm bg-purple-500">AI</div>
+                <div class="p-3 rounded-lg bg-gray-200 text-gray-800 rounded-bl-none">
+                    <div class="dot-flashing"></div>
+                </div>
+            `;
+            chatContainer.appendChild(loadingElement);
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+        }
+
+        // 移除加载动画
+        function removeLoadingIndicator() {
+            const loadingIndicator = document.getElementById('loading-indicator');
+            if (loadingIndicator) {
+                loadingIndicator.remove();
+            }
+        }
+
+        // 发送消息
+        async function sendMessage() {
+            const messageText = messageInput.value.trim();
+            if (messageText === '') return;
+
+            addMessage('user', messageText);
+            conversationHistory.push({ role: 'user', parts: [{ text: messageText }] });
+            messageInput.value = '';
+            
+            addLoadingIndicator();
+            
+            try {
+                // 向后端发送请求
+                const response = await fetch('/api/chat',{
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        // 只发送最近的20条记录
+                        history: conversationHistory.slice(-20) 
+                    }),
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                removeLoadingIndicator();
+
+                const reader = response.body.getReader();
+                const decoder = new TextDecoder();
+                let aiMessageBubble = addMessage('ai', '');
+                let aiResponseText = '';
+
+                // 开始流式读取
+                while (true) {
+                    const { done, value } = await reader.read();
+                    if (done) break;
+                    
+                    const chunk = decoder.decode(value, { stream: true });
+                    aiResponseText += chunk;
+                    aiMessageBubble.textContent = aiResponseText; // 实时更新内容
+                    chatContainer.scrollTop = chatContainer.scrollHeight;
+                }
+                
+                // 【重要修复】检查最终回复是否为空
+                if (aiResponseText.trim() === '') {
+                    const fallbackMessage = "[AI无响应。这可能是因为提问触发了安全设置，请尝试更换一种更友好的提问方式。]";
+                    aiMessageBubble.textContent = fallbackMessage;
+                    aiResponseText = fallbackMessage; // 更新变量以便存入历史
+                }
+                
+                // 流结束后，将完整消息存入历史
+                conversationHistory.push({ role: 'model', parts: [{ text: aiResponseText }] });
+
+            } catch (error) {
+                console.error('Error:', error);
+                removeLoadingIndicator();
+                addMessage('ai', '抱歉，我好像出错了。请检查后端服务是否正常运行。');
+            }
+        }
+
+        sendButton.addEventListener('click', sendMessage);
+        messageInput.addEventListener('keydown', (event) => {
+            if (event.key === 'Enter') {
+                sendMessage();
+            }
+        });
+
+        // AI 的开场白
+        window.addEventListener('load', () => {
+            const openingLine = "仇人们别来烦我！";
+            addMessage('ai', openingLine);
+        });
+    </script>
+</body>
+</html>
