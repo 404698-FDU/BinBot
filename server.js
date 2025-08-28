@@ -3,6 +3,7 @@ const cors = require('cors');
 const fs = require('fs');
 const path = require('path');
 const { GoogleGenerativeAI } = require("@google/generative-ai");
+require('dotenv').config(); // <-- 新增：加载 .env 文件
 
 // --- 配置 ---
 const PORT = 3000;
