@@ -9,7 +9,7 @@ const PORT = 3000;
 const DATA_FILE_PATH = path.join(__dirname, 'data.txt');
 // 在这里填入你的 Gemini API Key
 const API_KEY = process.env.API_KEY;
-const MODEL_NAME = "gemini-2.5-flash"; // 选择 Gemini 模型
+const MODEL_NAME = "gemini-2.5-pro"; // 选择 Gemini 模型
 
 // --- 初始化 ---
 const app = express();
