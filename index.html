@@ -167,8 +167,8 @@
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
-                        // 只发送最近的20条记录
-                        history: conversationHistory.slice(-20) 
+                        // 只发送最近的5条记录
+                        history: conversationHistory.slice(-5) 
                     }),
                 });
 
